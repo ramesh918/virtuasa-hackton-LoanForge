@@ -23,6 +23,10 @@ export class Applicant {
 
   @Prop({ required: true })
   employmentType!: string;
+
+  /** Synthetic payout destination — masked before it is ever logged or persisted elsewhere (NFR-03). */
+  @Prop({ required: true })
+  accountNumber!: string;
 }
 
 export const ApplicantSchema = SchemaFactory.createForClass(Applicant);

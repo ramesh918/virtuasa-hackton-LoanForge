@@ -4,9 +4,30 @@ const MONGO_URI =
   process.env.MONGO_URI ?? 'mongodb://localhost:27117/loanforge?replicaSet=rs0&directConnection=true';
 
 const syntheticApplicants = [
-  { applicantId: 'APP-0001', name: 'Jordan Rivera', income: '5200.00', age: 34, employmentType: 'SALARIED' },
-  { applicantId: 'APP-0002', name: 'Sam Okafor', income: '3100.00', age: 22, employmentType: 'SELF_EMPLOYED' },
-  { applicantId: 'APP-0003', name: 'Priya Nandan', income: '7800.00', age: 45, employmentType: 'SALARIED' },
+  {
+    applicantId: 'APP-0001',
+    name: 'Jordan Rivera',
+    income: '5200.00',
+    age: 34,
+    employmentType: 'SALARIED',
+    accountNumber: '4000123456781234',
+  },
+  {
+    applicantId: 'APP-0002',
+    name: 'Sam Okafor',
+    income: '3100.00',
+    age: 22,
+    employmentType: 'SELF_EMPLOYED',
+    accountNumber: '4000123456782345',
+  },
+  {
+    applicantId: 'APP-0003',
+    name: 'Priya Nandan',
+    income: '7800.00',
+    age: 45,
+    employmentType: 'SALARIED',
+    accountNumber: '4000123456783456',
+  },
 ];
 
 const syntheticProducts = [

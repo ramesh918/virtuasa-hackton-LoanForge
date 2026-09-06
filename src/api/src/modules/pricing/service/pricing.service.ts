@@ -55,4 +55,8 @@ export class PricingService {
 
     return this.repository.save(offer);
   }
+
+  async getOffer(applicationId: string): Promise<Offer | null> {
+    return this.repository.findByApplicationId(applicationId);
+  }
 }

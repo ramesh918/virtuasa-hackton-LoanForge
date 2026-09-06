@@ -65,6 +65,7 @@ const baseApplicant: Applicant = {
   income: '5000.00',
   age: 34,
   employmentType: 'SALARIED',
+  accountNumber: '4000123456781234',
 };
 
 const lowObligations: BureauPullResult = { creditScore: 720, existingMonthlyObligations: Money.of('500.00') };

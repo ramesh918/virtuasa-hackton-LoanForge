@@ -7,7 +7,7 @@ Disbursement & Audit (AC-08)
 2026-09-06
 
 ## Status
-Done
+Done — archived 2026-09-06 by the janitor agent (feature merged into feature-1)
 
 ## Goal
 On an accepted offer for an `APPROVED` application, disburse funds through a stubbed payout adapter and

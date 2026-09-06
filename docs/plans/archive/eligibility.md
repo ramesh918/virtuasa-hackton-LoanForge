@@ -7,7 +7,7 @@ Eligibility & Credit Rules (AC-02, AC-03)
 2026-09-06
 
 ## Status
-Done
+Done — archived 2026-09-06 by the janitor agent (feature merged into feature-1)
 
 ## Goal
 Evaluate an already-submitted application against policy (income/age/employment) and a stubbed credit

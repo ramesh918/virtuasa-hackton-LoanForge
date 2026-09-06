@@ -4,7 +4,8 @@
   "description": "LoanForge AI-native substrate: agents, skills, hooks, commands for retail loan origination.",
   "agents": [
     "./.claude/agents/planner.md",
-    "./.claude/agents/reviewer.md"
+    "./.claude/agents/reviewer.md",
+    "./.claude/agents/janitor.md"
   ],
   "skills": [
     "./.claude/skills/emi-calculator"

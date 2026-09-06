@@ -1,7 +1,10 @@
 # ADR 0001: MongoDB (single-node replica set) over a relational database
 
 ## Status
-Accepted
+Superseded by [ADR 0002](0002-sqlite-over-mongodb.md) — MongoDB required Docker to run locally, which
+became a real barrier for anyone picking up this repository without it already installed. Kept here as
+a historical record; the technical tradeoffs below (transactions, concurrency guard, replica-set
+requirement) are still an accurate account of what was actually built and debugged at the time.
 
 ## Context
 LoanForge's core records — applications, decisions, offers, disbursements — are append-only and

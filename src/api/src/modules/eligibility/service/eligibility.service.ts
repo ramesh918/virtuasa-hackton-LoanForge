@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IntakeService } from '../../intake/service/intake.service.js';
+import { UnderwritingService } from '../../underwriting/service/underwriting.service.js';
 import { APPLICANT_REPOSITORY } from '../repository/applicant.repository.js';
 import type { ApplicantRepository } from '../repository/applicant.repository.js';
 import { BureauStubService } from './bureau-stub.service.js';
@@ -18,6 +19,7 @@ export interface EligibilityDecision {
 export class EligibilityService {
   constructor(
     private readonly intakeService: IntakeService,
+    private readonly underwritingService: UnderwritingService,
     @Inject(APPLICANT_REPOSITORY) private readonly applicantRepository: ApplicantRepository,
     private readonly bureauStub: BureauStubService,
   ) {}
@@ -65,7 +67,7 @@ export class EligibilityService {
     creditScore?: number,
     dti?: Money,
   ): Promise<EligibilityDecision> {
-    await this.intakeService.updateState(applicationId, ApplicationState.REJECTED);
+    await this.underwritingService.transition(applicationId, ApplicationState.REJECTED);
     return { eligible: false, reason, creditScore, dti: dti?.toFixedString(4) };
   }
 }

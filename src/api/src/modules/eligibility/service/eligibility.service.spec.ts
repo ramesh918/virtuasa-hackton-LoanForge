@@ -3,21 +3,26 @@ import { EligibilityService } from './eligibility.service.js';
 import { ApplicantRepository } from '../repository/applicant.repository.js';
 import { BureauStubService, BureauPullResult } from './bureau-stub.service.js';
 import { IntakeService } from '../../intake/service/intake.service.js';
+import { UnderwritingService } from '../../underwriting/service/underwriting.service.js';
 import { Application } from '../../intake/schema/application.schema.js';
 import { Applicant } from '../schema/applicant.schema.js';
 import { ApplicationState } from '../../../domain/application-state.js';
 import { Money } from '../../../domain/money.js';
 import { EligibilityRejectionReason } from '../config/eligibility.config.js';
 
-function fakeIntakeService(application: Application): IntakeService {
+function fakeIntakeService(application: Application): { intake: IntakeService; store: Application } {
   const store = { ...application };
+  const intake = { findById: async () => ({ ...store }) } as unknown as IntakeService;
+  return { intake, store };
+}
+
+function fakeUnderwritingService(store: Application): UnderwritingService {
   return {
-    findById: async () => ({ ...store }),
-    updateState: async (_id: string, state: ApplicationState) => {
+    transition: async (_id: string, state: ApplicationState) => {
       store.state = state;
       return { ...store };
     },
-  } as unknown as IntakeService;
+  } as unknown as UnderwritingService;
 }
 
 function fakeApplicantRepository(applicant: Applicant | null): ApplicantRepository {
@@ -26,6 +31,20 @@ function fakeApplicantRepository(applicant: Applicant | null): ApplicantReposito
 
 function fakeBureauStub(result: BureauPullResult): BureauStubService {
   return { pull: () => result } as unknown as BureauStubService;
+}
+
+function buildService(
+  application: Application,
+  applicant: Applicant | null,
+  bureauResult: BureauPullResult,
+): EligibilityService {
+  const { intake, store } = fakeIntakeService(application);
+  return new EligibilityService(
+    intake,
+    fakeUnderwritingService(store),
+    fakeApplicantRepository(applicant),
+    fakeBureauStub(bureauResult),
+  );
 }
 
 const baseApplication: Application = {
@@ -53,11 +72,7 @@ const lowObligations: BureauPullResult = { creditScore: 720, existingMonthlyObli
 describe('EligibilityService', () => {
   it('rejects applicant below minimum income with INELIGIBLE_INCOME [AC-02]', async () => {
     const application = { ...baseApplication, income: '1000.00' };
-    const service = new EligibilityService(
-      fakeIntakeService(application),
-      fakeApplicantRepository(baseApplicant),
-      fakeBureauStub(lowObligations),
-    );
+    const service = buildService(application, baseApplicant, lowObligations);
 
     const decision = await service.evaluate(application.applicationId);
 
@@ -66,11 +81,7 @@ describe('EligibilityService', () => {
 
   it('rejects applicant outside age band with INELIGIBLE_AGE [AC-02]', async () => {
     const applicant = { ...baseApplicant, age: 19 };
-    const service = new EligibilityService(
-      fakeIntakeService(baseApplication),
-      fakeApplicantRepository(applicant),
-      fakeBureauStub(lowObligations),
-    );
+    const service = buildService(baseApplication, applicant, lowObligations);
 
     const decision = await service.evaluate(baseApplication.applicationId);
 
@@ -79,11 +90,7 @@ describe('EligibilityService', () => {
 
   it('rejects ineligible employment type with INELIGIBLE_EMPLOYMENT [AC-02]', async () => {
     const application = { ...baseApplication, employmentType: 'UNEMPLOYED' };
-    const service = new EligibilityService(
-      fakeIntakeService(application),
-      fakeApplicantRepository(baseApplicant),
-      fakeBureauStub(lowObligations),
-    );
+    const service = buildService(application, baseApplicant, lowObligations);
 
     const decision = await service.evaluate(application.applicationId);
 
@@ -94,11 +101,7 @@ describe('EligibilityService', () => {
   });
 
   it('computes a credit score from the stubbed bureau pull [AC-03]', async () => {
-    const service = new EligibilityService(
-      fakeIntakeService(baseApplication),
-      fakeApplicantRepository(baseApplicant),
-      fakeBureauStub(lowObligations),
-    );
+    const service = buildService(baseApplication, baseApplicant, lowObligations);
 
     const decision = await service.evaluate(baseApplication.applicationId);
 
@@ -111,11 +114,7 @@ describe('EligibilityService', () => {
       creditScore: 650,
       existingMonthlyObligations: Money.of('4000.00'), // 4000/5000 = 0.8, well above the 0.45 ceiling
     };
-    const service = new EligibilityService(
-      fakeIntakeService(baseApplication),
-      fakeApplicantRepository(baseApplicant),
-      fakeBureauStub(highObligations),
-    );
+    const service = buildService(baseApplication, baseApplicant, highObligations);
 
     const decision = await service.evaluate(baseApplication.applicationId);
 

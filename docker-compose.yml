@@ -3,10 +3,28 @@ services:
     image: mongo:7
     container_name: loanforge-mongo
     restart: unless-stopped
+    # Multi-document transactions (NFR-06) require a replica set, even a single-node one.
+    command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
       - "27117:27017"
     volumes:
       - loanforge-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # One-shot: initializes the single-node replica set on first boot; a no-op on later `up`s.
+  mongo-init:
+    image: mongo:7
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: >
+      mongosh --host mongo:27017 --quiet --eval
+      "try { rs.status(); print('replica set already initialized'); } catch (e) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongo:27017'}]}); print('replica set initiated'); }"
 
 volumes:
   loanforge-mongo-data:

@@ -40,4 +40,21 @@ export class IntakeService {
 
     return this.repository.create(application);
   }
+
+  async findById(applicationId: string): Promise<Application | null> {
+    return this.repository.findByApplicationId(applicationId);
+  }
+
+  /**
+   * Narrow, unguarded state write used by eligibility's auto-reject path. The full lifecycle
+   * transition table and NFR-06 concurrency guard are formalized by the underwriting feature —
+   * every caller of this method is expected to move to that state machine once it exists.
+   */
+  async updateState(applicationId: string, state: ApplicationState): Promise<Application> {
+    const updated = await this.repository.updateState(applicationId, state);
+    if (!updated) {
+      throw new Error(`Application ${applicationId} not found`);
+    }
+    return updated;
+  }
 }

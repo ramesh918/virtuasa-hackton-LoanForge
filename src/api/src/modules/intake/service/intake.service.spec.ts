@@ -29,6 +29,18 @@ class FakeIntakeRepository implements IntakeRepository {
       ) ?? null
     );
   }
+
+  async findByApplicationId(applicationId: string): Promise<Application | null> {
+    return this.applications.find((app) => app.applicationId === applicationId) ?? null;
+  }
+
+  async updateState(applicationId: string, state: ApplicationState): Promise<Application | null> {
+    const application = await this.findByApplicationId(applicationId);
+    if (application) {
+      application.state = state;
+    }
+    return application;
+  }
 }
 
 const validDto: CreateApplicationDto = {

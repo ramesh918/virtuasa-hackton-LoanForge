@@ -1,0 +1,47 @@
+# LoanForge CI pipeline (artefact only — there is no CI runner configured for this hackathon's
+# infra, so this file is not executed anywhere; it documents the intended build/test pipeline).
+#
+# Every stage below mirrors a command actually run locally throughout this build — see README.md's
+# Quick Start / Tests sections for the same commands.
+stages:
+  - install
+  - build
+  - test
+  - architecture-test
+  - coverage
+
+install:
+  stage: install
+  image: node:22
+  script:
+    - npm install
+
+build:
+  stage: build
+  image: node:22
+  script:
+    - npm run build --workspace=src/api
+    - npm run build --workspace=web
+
+unit-tests:
+  stage: test
+  image: node:22
+  script:
+    # The backend Vitest suite uses in-memory fake repositories throughout (see any *.spec.ts under
+    # src/api/src/modules/*/service) — no live MongoDB is required to run it.
+    - npm run test:cov --workspace=src/api
+
+architecture-test:
+  stage: architecture-test
+  image: node:22
+  script:
+    - npm run test:arch --workspace=src/api
+
+coverage-artifact:
+  stage: coverage
+  image: node:22
+  script:
+    - echo "coverage report at src/api/coverage/lcov.info"
+  artifacts:
+    paths:
+      - src/api/coverage/lcov.info

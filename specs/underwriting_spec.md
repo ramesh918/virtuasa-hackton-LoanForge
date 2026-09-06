@@ -28,8 +28,8 @@ conflict, never a silent overwrite or a double-write.
   receives a conflict.
 - An underwriter attempts to approve an application already in `DISBURSED` → `InvalidApplicationStateException`,
   no state change.
-- The state update and the `DecisionRecord` insert happen inside a single Mongo transaction — if either
-  fails, neither is persisted.
+- The state update and the `DecisionRecord` insert happen inside a single database transaction — if
+  either fails, neither is persisted.
 
 ## Out of Scope
 Disbursement execution itself (`specs/disbursement_spec.md`) — approval only marks `APPROVED`;

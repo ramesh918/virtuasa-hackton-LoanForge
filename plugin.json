@@ -1,0 +1,17 @@
+{
+  "name": "loanforge-substrate",
+  "version": "0.1.0",
+  "description": "LoanForge AI-native substrate: agents, skills, hooks, commands for retail loan origination.",
+  "agents": [
+    "./.claude/agents/planner.md",
+    "./.claude/agents/reviewer.md",
+    "./.claude/agents/janitor.md"
+  ],
+  "skills": [
+    "./.claude/skills/emi-calculator"
+  ],
+  "hooks": "./.claude/settings.json",
+  "commands": [
+    "./.claude/commands/spec-from-brd.md"
+  ]
+}

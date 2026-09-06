@@ -5,7 +5,7 @@ import { Application } from '../schema/application.schema.js';
 import { INTAKE_REPOSITORY } from '../repository/intake.repository.js';
 import type { IntakeRepository } from '../repository/intake.repository.js';
 import { ApplicationState } from '../../../domain/application-state.js';
-import { DuplicateApplicationException } from '../../../domain/exceptions.js';
+import { DuplicateApplicationException, InvalidTenureException } from '../../../domain/exceptions.js';
 import { Money } from '../../../domain/money.js';
 
 /** AC-05: how far back to look for an active duplicate application. */
@@ -16,6 +16,10 @@ export class IntakeService {
   constructor(@Inject(INTAKE_REPOSITORY) private readonly repository: IntakeRepository) {}
 
   async submit(dto: CreateApplicationDto): Promise<Application> {
+    if (dto.tenureMonths <= 0) {
+      throw new InvalidTenureException(dto.tenureMonths);
+    }
+
     const sinceDate = new Date(Date.now() - DUPLICATE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
     const duplicate = await this.repository.findActiveByApplicantAndProduct(
       dto.applicantId,

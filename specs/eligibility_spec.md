@@ -2,8 +2,21 @@
 
 References `specs/app_spec.md`. Runs after intake (AC-01) creates an application. Validates policy
 rules, then computes a credit score and DTI, deciding auto-decline or pass-through to pricing
-(`specs/risk_pricing_spec.md`). Not exposed as a public HTTP endpoint — invoked by the underwriting
-orchestration built in `specs/underwriting_spec.md`.
+(`specs/risk_pricing_spec.md`).
+
+## Orchestration entry point (closes a gap found in manual verification)
+`POST /applications/:id/evaluate` (`EligibilityController`) is the single trigger for "what happens
+right after intake." It runs `EligibilityService.evaluate(applicationId)`:
+- If ineligible or DTI-exceeded, the application is already moved to `REJECTED` by `evaluate()` itself
+  — nothing further happens.
+- If eligible, this endpoint additionally calls `PricingService.priceApplication(applicationId,
+  creditScore)` to generate the offer, then `UnderwritingService.transition(applicationId,
+  UNDER_REVIEW)` so the application appears in the underwriter's queue (AC-07).
+
+The applicant-facing frontend calls this endpoint immediately after a successful `POST /applications`
+(AC-01), before showing the application's status — an applicant should never see an application stuck
+in `SUBMITTED` with no path forward. NFR-04 applies: only the owning applicant (or an underwriter) may
+trigger evaluation for a given application.
 
 ## Acceptance Criteria
 

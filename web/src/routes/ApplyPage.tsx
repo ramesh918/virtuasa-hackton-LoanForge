@@ -33,7 +33,11 @@ export function ApplyPage() {
         income,
         employmentType,
       });
-      navigate(`/applications/${(application as { applicationId: string }).applicationId}`);
+      const { applicationId } = application as { applicationId: string };
+      // Runs eligibility + pricing immediately so the application never sits in SUBMITTED with no
+      // path forward — see specs/eligibility_spec.md's "Orchestration entry point".
+      await api.evaluate(applicationId).catch(() => undefined);
+      navigate(`/applications/${applicationId}`);
     } catch (err) {
       setError(err instanceof ApiError ? JSON.stringify(err.body) : 'Failed to submit application');
     } finally {
@@ -42,7 +46,7 @@ export function ApplyPage() {
   }
 
   return (
-    <main>
+    <div className="card">
       <h1>Apply for a loan</h1>
       <form onSubmit={handleSubmit}>
         <label>
@@ -85,6 +89,6 @@ export function ApplyPage() {
         </button>
       </form>
       {error && <p role="alert">{error}</p>}
-    </main>
+    </div>
   );
 }

@@ -5,7 +5,8 @@
   "agents": [
     "./.claude/agents/planner.md",
     "./.claude/agents/reviewer.md",
-    "./.claude/agents/janitor.md"
+    "./.claude/agents/janitor.md",
+    "./.claude/agents/underwriting-agent.md"
   ],
   "skills": [
     "./.claude/skills/emi-calculator"

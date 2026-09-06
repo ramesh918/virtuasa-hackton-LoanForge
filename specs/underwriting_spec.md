@@ -10,7 +10,10 @@ review queue and decision record.
 via an explicit allowed-transition table. Any transition not in that table throws
 `InvalidApplicationStateException`, and the application's stored state is left unchanged. `SUBMITTED ->
 REJECTED` is also allowed directly, for eligibility's automatic decline path (`specs/eligibility_spec.md`,
-AC-02/AC-03) — that decision never goes through a human queue.
+AC-02/AC-03) — that decision never goes through a human queue. `SUBMITTED -> UNDER_REVIEW` is driven by
+eligibility's orchestration endpoint (`specs/eligibility_spec.md`'s `POST /applications/:id/evaluate`),
+not by anything in this module — underwriting only guards and records the transition, it doesn't trigger
+it.
 
 **AC-07**: An underwriter can approve, decline, or request more information from a review queue (query:
 applications in `UNDER_REVIEW` or `MANUAL_REVIEW`). Every decision is recorded as an append-only

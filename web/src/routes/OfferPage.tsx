@@ -16,7 +16,8 @@ export function OfferPage() {
   const { applicationId } = useParams<{ applicationId: string }>();
   const navigate = useNavigate();
   const [offer, setOffer] = useState<OfferView | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
 
   useEffect(() => {
@@ -24,18 +25,20 @@ export function OfferPage() {
     api
       .getOffer(applicationId)
       .then((result) => setOffer(result as OfferView))
-      .catch((err) => setError(err instanceof ApiError ? JSON.stringify(err.body) : 'Failed to load offer'));
+      .catch((err) =>
+        setLoadError(err instanceof ApiError ? JSON.stringify(err.body) : 'Failed to load offer'),
+      );
   }, [applicationId]);
 
   async function handleAccept() {
     if (!applicationId) return;
     setAccepting(true);
-    setError(null);
+    setActionError(null);
     try {
       await api.acceptOffer(applicationId);
       navigate(`/applications/${applicationId}`);
     } catch (err) {
-      setError(err instanceof ApiError ? JSON.stringify(err.body) : 'Failed to accept offer');
+      setActionError(err instanceof ApiError ? JSON.stringify(err.body) : 'Failed to accept offer');
     } finally {
       setAccepting(false);
     }
@@ -45,24 +48,33 @@ export function OfferPage() {
     navigate(`/applications/${applicationId}`);
   }
 
-  if (error) return <p role="alert">{error}</p>;
+  if (loadError) return <p role="alert">{loadError}</p>;
   if (!offer) return <p>Loading...</p>;
 
   return (
-    <main>
+    <div className="card">
       <h1>Your offer</h1>
-      <p>Rate band: {offer.rateBandLabel}</p>
-      <p>Annual rate: {Number(offer.annualRate) * 100}%</p>
-      <p>Monthly EMI: {offer.emi}</p>
-      <p>
-        Schedule: {offer.tenureMonths} monthly payments, total payable {offer.totalPayable}
-      </p>
-      <button onClick={handleAccept} disabled={accepting}>
-        Accept offer
-      </button>
-      <button onClick={handleDecline} disabled={accepting}>
-        Decline
-      </button>
-    </main>
+      <dl className="offer-details">
+        <dt>Rate band</dt>
+        <dd>{offer.rateBandLabel}</dd>
+        <dt>Annual rate</dt>
+        <dd>{Number(offer.annualRate) * 100}%</dd>
+        <dt>Monthly EMI</dt>
+        <dd>{offer.emi}</dd>
+        <dt>Schedule</dt>
+        <dd>
+          {offer.tenureMonths} monthly payments, total payable {offer.totalPayable}
+        </dd>
+      </dl>
+      <div className="button-row">
+        <button onClick={handleAccept} disabled={accepting}>
+          Accept offer
+        </button>
+        <button className="button-secondary" onClick={handleDecline} disabled={accepting}>
+          Decline
+        </button>
+      </div>
+      {actionError && <p role="alert">{actionError}</p>}
+    </div>
   );
 }

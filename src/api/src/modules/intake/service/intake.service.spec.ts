@@ -3,7 +3,7 @@ import { IntakeService } from './intake.service.js';
 import { IntakeRepository } from '../repository/intake.repository.js';
 import { Application } from '../schema/application.schema.js';
 import { ApplicationState } from '../../../domain/application-state.js';
-import { DuplicateApplicationException } from '../../../domain/exceptions.js';
+import { DuplicateApplicationException, InvalidTenureException } from '../../../domain/exceptions.js';
 import { CreateApplicationDto } from '../dto/create-application.dto.js';
 
 class FakeIntakeRepository implements IntakeRepository {
@@ -76,5 +76,17 @@ describe('IntakeService', () => {
     first.state = ApplicationState.REJECTED;
 
     await expect(service.submit(validDto)).resolves.toMatchObject({ state: ApplicationState.SUBMITTED });
+  });
+
+  it('rejects an application with a non-positive tenure [AC-01]', async () => {
+    const repository = new FakeIntakeRepository();
+    const service = new IntakeService(repository);
+
+    await expect(service.submit({ ...validDto, tenureMonths: 0 })).rejects.toBeInstanceOf(
+      InvalidTenureException,
+    );
+    await expect(service.submit({ ...validDto, tenureMonths: -3 })).rejects.toBeInstanceOf(
+      InvalidTenureException,
+    );
   });
 });

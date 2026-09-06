@@ -1,0 +1,14 @@
+# Knowledge Deposits
+
+Recurring mistakes and gotchas hit while building LoanForge, encoded back into rules, hooks, docs, or
+code so the same time isn't lost twice. Every row below is a real incident from this build — see the
+linked doc for the full trace.
+
+| Date | Mistake / Recurring Issue | Encoded Into |
+|---|---|---|
+| 2026-09-06 | A TS `const` and `type` sharing one name (`ApplicationState`) made `emitDecoratorMetadata` pick the const object as a Mongoose field's runtime type, crashing schema creation with `SUBMITTED is not a valid type at path SUBMITTED`. | `docs/fix-loops/mongoose-schema-enum-type-collision.md`; the same pattern (`Decision` in `decision-record.schema.ts`) now sets `type: String` explicitly from the first draft instead of relying on reflection. |
+| 2026-09-06 | Multi-document Mongo transactions (needed for NFR-06) fail against a plain standalone `mongod` with `Transaction numbers are only allowed on a replica set member` — the original step-1 Docker setup wasn't a replica set. | `docs/debugging.md`; `docker-compose.yml`'s `mongo-init` one-shot service now initializes a single-node replica set on first boot, and `README.md`'s Quick Start calls this out explicitly. |
+| 2026-09-06 | `mongoose`'s `Connection`/`ClientSession` types aren't cleanly exposed as named ESM exports under Node's native CJS interop (`nest start`/`node dist/main.js` threw `does not provide an export named 'Connection'`), even though `tsc` compiled cleanly and Vitest's esbuild-based transform never surfaced it. | Any `mongoose` type used only as a type annotation is now imported with `import type` throughout `underwriting`/`disbursement` — erased at compile time, so the runtime resolution question never arises. |
+| 2026-09-06 | Four services (`eligibility`, `pricing`, `underwriting`, `disbursement`) threw a raw `new Error(...)` for "not found" cases, which NestJS surfaces as an unhandled 500 instead of a clean 4xx — only found because the frontend's real accept-offer button produced a 500 in a live browser test. | All four now throw `NotFoundException`/`UnprocessableEntityException`; caught by the browser-driven verification in step 10, not a code review. |
+| 2026-09-06 | `dependency-cruiser` silently reports zero violations for an import that's syntactically present but never used as a real value (including type-only `import('...').Type` references) — it gets elided before dependency-cruiser's analysis sees it. | `docs/architecture.md`'s Enforcement section documents this explicitly, so a future "let me just spot-check the rule" doesn't waste time on a false negative. |
+| 2026-09-06 | `specs/risk_pricing_spec.md` documented that intake owns tenure validation (AC-01), but `IntakeService` never actually implemented it — a spec/code drift that sat unnoticed through steps 5–16. | Closed test-first in `docs/tdd.md`'s worked example; `InvalidTenureException` added to `src/api/src/domain/exceptions.ts`. |

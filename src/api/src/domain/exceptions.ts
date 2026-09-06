@@ -1,4 +1,4 @@
-import { ConflictException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, ConflictException, UnprocessableEntityException } from '@nestjs/common';
 
 /** AC-05: a second active application exists for the same applicant+product within the window. */
 export class DuplicateApplicationException extends ConflictException {
@@ -16,6 +16,16 @@ export class InvalidApplicationStateException extends UnprocessableEntityExcepti
     super({
       reason: 'INVALID_STATE_TRANSITION',
       message: `Application ${applicationId} cannot transition from ${from} to ${to}`,
+    });
+  }
+}
+
+/** AC-01: tenure must be a positive number of months — see risk_pricing_spec.md's edge cases. */
+export class InvalidTenureException extends BadRequestException {
+  constructor(tenureMonths: number) {
+    super({
+      reason: 'INVALID_TENURE',
+      message: `Tenure must be a positive number of months, got ${tenureMonths}`,
     });
   }
 }

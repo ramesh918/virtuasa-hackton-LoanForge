@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import type { Connection } from 'mongoose';
 import { IntakeService } from '../../intake/service/intake.service.js';
@@ -35,17 +35,17 @@ export class DisbursementService {
   async acceptOffer(applicationId: string): Promise<DisbursementRecord> {
     const application = await this.intakeService.findById(applicationId);
     if (!application) {
-      throw new Error(`Application ${applicationId} not found`);
+      throw new NotFoundException(`Application ${applicationId} not found`);
     }
 
     const offer = await this.pricingService.getOffer(applicationId);
     if (!offer) {
-      throw new Error(`No offer found for application ${applicationId}`);
+      throw new UnprocessableEntityException(`No offer found for application ${applicationId}`);
     }
 
     const accountNumber = await this.accountRepository.findAccountNumber(application.applicantId);
     if (!accountNumber) {
-      throw new Error(`No account on file for applicant ${application.applicantId}`);
+      throw new UnprocessableEntityException(`No account on file for applicant ${application.applicantId}`);
     }
 
     const { payoutReference, maskedAccountReference } = this.payoutAdapter.pay(

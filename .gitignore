@@ -145,5 +145,11 @@ vite.config.ts.timestamp-*
 # Root-level hackathon planning docs only — must not shadow docs/prompts/ (a graded deliverable)
 /prompts/
 
+# Playwright
+/web/test-results/
+/web/playwright-report/
+/web/blob-report/
+/web/playwright/.cache/
+
 # macOS
 .DS_Store

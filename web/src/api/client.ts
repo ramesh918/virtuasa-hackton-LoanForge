@@ -45,6 +45,9 @@ export const api = {
 
   getApplication: (applicationId: string) => request(`/applications/${applicationId}`),
 
+  evaluate: (applicationId: string) =>
+    request(`/applications/${applicationId}/evaluate`, { method: 'PATCH' }),
+
   getOffer: (applicationId: string) => request(`/applications/${applicationId}/offer`),
 
   acceptOffer: (applicationId: string) =>

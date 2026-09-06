@@ -22,8 +22,15 @@ async function login(page: import('@playwright/test').Page, role: 'applicant' | 
   await page.click('button:has-text("Continue")');
 }
 
-test('applicant applies for a loan and sees SUBMITTED status [AC-01]', async ({ page, request }) => {
+test('applicant applies for a loan and is automatically evaluated into UNDER_REVIEW [AC-01]', async ({
+  page,
+  request,
+}) => {
   const { applicantId, productId } = uniqueApplicantAndProduct();
+  // ApplyPage triggers PATCH /applications/:id/evaluate right after submit (see
+  // specs/eligibility_spec.md's orchestration entry point) — a seeded profile is required for
+  // eligibility to pass deterministically instead of racing an unseeded auto-reject.
+  await insertApplicantProfile(applicantId);
   await login(page, 'applicant', applicantId);
 
   await page.selectOption('select >> nth=0', productId);
@@ -35,14 +42,14 @@ test('applicant applies for a loan and sees SUBMITTED status [AC-01]', async ({ 
   await page.click('button:has-text("Submit application")');
 
   await page.waitForURL('**/applications/*');
-  await expect(page.getByText('SUBMITTED')).toBeVisible();
+  await expect(page.locator('.status-badge')).toHaveText('UNDER_REVIEW', { timeout: 10000 });
 
   const applicationId = page.url().split('/applications/')[1];
   const response = await request.get(`${API_BASE_URL}/applications/${applicationId}`, {
     headers: { 'x-role': 'applicant', 'x-applicant-id': applicantId },
   });
   expect(response.ok()).toBe(true);
-  expect((await response.json()).state).toBe('SUBMITTED');
+  expect((await response.json()).state).toBe('UNDER_REVIEW');
 });
 
 test('underwriter approves a queued application from the real UI [AC-07]', async ({ page, request }) => {
@@ -96,12 +103,12 @@ test('applicant views and accepts a priced offer, reaching DISBURSED [AC-08]', a
 
   await login(page, 'applicant', applicantId);
   await page.goto(`/applications/${applicationId}`);
-  await expect(page.getByText('APPROVED')).toBeVisible();
+  await expect(page.locator('.status-badge')).toHaveText('APPROVED');
 
   await page.click('text=View offer');
   await expect(page.getByText('Monthly EMI')).toBeVisible();
   await page.click('button:has-text("Accept offer")');
 
   await page.waitForURL(`**/applications/${applicationId}`);
-  await expect(page.getByText('DISBURSED')).toBeVisible();
+  await expect(page.locator('.status-badge')).toHaveText('DISBURSED');
 });

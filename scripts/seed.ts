@@ -1,6 +1,7 @@
 import { MongoClient } from 'mongodb';
 
-const MONGO_URI = process.env.MONGO_URI ?? 'mongodb://localhost:27117/loanforge';
+const MONGO_URI =
+  process.env.MONGO_URI ?? 'mongodb://localhost:27117/loanforge?replicaSet=rs0&directConnection=true';
 
 const syntheticApplicants = [
   { applicantId: 'APP-0001', name: 'Jordan Rivera', income: '5200.00', age: 34, employmentType: 'SALARIED' },

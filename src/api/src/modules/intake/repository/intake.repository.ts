@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Application, ApplicationDocument } from '../schema/application.schema.js';
-import { isActiveState, ApplicationState } from '../../../domain/application-state.js';
+import { isActiveState } from '../../../domain/application-state.js';
 
 export interface IntakeRepository {
   create(application: Application): Promise<Application>;
@@ -12,7 +12,6 @@ export interface IntakeRepository {
     sinceDate: Date,
   ): Promise<Application | null>;
   findByApplicationId(applicationId: string): Promise<Application | null>;
-  updateState(applicationId: string, state: ApplicationState): Promise<Application | null>;
 }
 
 export const INTAKE_REPOSITORY = Symbol('INTAKE_REPOSITORY');
@@ -40,12 +39,5 @@ export class MongoIntakeRepository implements IntakeRepository {
 
   async findByApplicationId(applicationId: string): Promise<Application | null> {
     return this.model.findOne({ applicationId }).lean().exec();
-  }
-
-  async updateState(applicationId: string, state: ApplicationState): Promise<Application | null> {
-    return this.model
-      .findOneAndUpdate({ applicationId }, { $set: { state } }, { returnDocument: 'after' })
-      .lean()
-      .exec();
   }
 }

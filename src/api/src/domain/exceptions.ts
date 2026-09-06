@@ -19,3 +19,13 @@ export class InvalidApplicationStateException extends UnprocessableEntityExcepti
     });
   }
 }
+
+/** NFR-06: a concurrent request already moved the application out of the expected state. */
+export class TransitionConflictException extends ConflictException {
+  constructor(applicationId: string, expectedState: string) {
+    super({
+      reason: 'TRANSITION_CONFLICT',
+      message: `Application ${applicationId} was no longer in state ${expectedState} when the transition was applied`,
+    });
+  }
+}

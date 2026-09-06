@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Headers, Param, Patch } from '@nestjs/common';
 import { UnderwritingService } from '../service/underwriting.service.js';
-import { Decision } from '../schema/decision-record.schema.js';
+import { Decision } from '../entity/decision-record.entity.js';
 import { assertUnderwriter, extractActor } from '../../../common/roles.js';
 
 class DecisionDto {

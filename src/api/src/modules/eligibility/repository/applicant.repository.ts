@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Applicant, ApplicantDocument } from '../schema/applicant.schema.js';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Applicant } from '../entity/applicant.entity.js';
 
 export interface ApplicantRepository {
   findByApplicantId(applicantId: string): Promise<Applicant | null>;
@@ -10,10 +10,10 @@ export interface ApplicantRepository {
 export const APPLICANT_REPOSITORY = Symbol('APPLICANT_REPOSITORY');
 
 @Injectable()
-export class MongoApplicantRepository implements ApplicantRepository {
-  constructor(@InjectModel(Applicant.name) private readonly model: Model<ApplicantDocument>) {}
+export class SqliteApplicantRepository implements ApplicantRepository {
+  constructor(@InjectRepository(Applicant) private readonly repository: Repository<Applicant>) {}
 
   async findByApplicantId(applicantId: string): Promise<Applicant | null> {
-    return this.model.findOne({ applicantId }).lean().exec();
+    return this.repository.findOne({ where: { applicantId } });
   }
 }

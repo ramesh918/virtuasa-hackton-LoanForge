@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { CreateApplicationDto } from '../dto/create-application.dto.js';
-import { Application } from '../schema/application.schema.js';
+import { Application } from '../entity/application.entity.js';
 import { INTAKE_REPOSITORY } from '../repository/intake.repository.js';
 import type { IntakeRepository } from '../repository/intake.repository.js';
 import { ApplicationState } from '../../../domain/application-state.js';

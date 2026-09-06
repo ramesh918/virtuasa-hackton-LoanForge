@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { IntakeModule } from '../intake/intake.module.js';
-import { Offer, OfferSchema } from './schema/offer.schema.js';
-import { PRICING_REPOSITORY, MongoPricingRepository } from './repository/pricing.repository.js';
+import { Offer } from './entity/offer.entity.js';
+import { PRICING_REPOSITORY, SqlitePricingRepository } from './repository/pricing.repository.js';
 import { PricingService } from './service/pricing.service.js';
 import { PricingController } from './controller/pricing.controller.js';
 
 @Module({
-  imports: [IntakeModule, MongooseModule.forFeature([{ name: Offer.name, schema: OfferSchema }])],
+  imports: [IntakeModule, TypeOrmModule.forFeature([Offer])],
   controllers: [PricingController],
-  providers: [PricingService, { provide: PRICING_REPOSITORY, useClass: MongoPricingRepository }],
+  providers: [PricingService, { provide: PRICING_REPOSITORY, useClass: SqlitePricingRepository }],
   exports: [PricingService],
 })
 export class PricingModule {}

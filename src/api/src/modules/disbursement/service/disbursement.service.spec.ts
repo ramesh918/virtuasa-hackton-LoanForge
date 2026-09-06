@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Logger } from '@nestjs/common';
-import type { ClientSession, Connection } from 'mongoose';
+import type { DataSource, EntityManager } from 'typeorm';
 import { DisbursementService } from './disbursement.service.js';
 import { DisbursementRepository } from '../repository/disbursement.repository.js';
 import { ApplicantAccountRepository } from '../repository/applicant-account.repository.js';
@@ -8,9 +8,9 @@ import { StubPayoutAdapter } from './stub-payout.adapter.js';
 import { IntakeService } from '../../intake/service/intake.service.js';
 import { PricingService } from '../../pricing/service/pricing.service.js';
 import { UnderwritingService } from '../../underwriting/service/underwriting.service.js';
-import { Application } from '../../intake/schema/application.schema.js';
-import { Offer } from '../../pricing/schema/offer.schema.js';
-import { DisbursementRecord } from '../schema/disbursement-record.schema.js';
+import { Application } from '../../intake/entity/application.entity.js';
+import { Offer } from '../../pricing/entity/offer.entity.js';
+import { DisbursementRecord } from '../entity/disbursement-record.entity.js';
 import { ApplicationState } from '../../../domain/application-state.js';
 import { InvalidApplicationStateException } from '../../../domain/exceptions.js';
 
@@ -55,14 +55,10 @@ function fakeApplicantAccountRepository(): ApplicantAccountRepository {
   return { findAccountNumber: async () => RAW_ACCOUNT_NUMBER };
 }
 
-function fakeConnection(): Connection {
+function fakeDataSource(): DataSource {
   return {
-    startSession: async () =>
-      ({
-        withTransaction: async (fn: () => Promise<void>) => fn(),
-        endSession: async () => {},
-      }) as unknown as ClientSession,
-  } as unknown as Connection;
+    transaction: async <T>(fn: (manager: EntityManager) => Promise<T>) => fn({} as EntityManager),
+  } as unknown as DataSource;
 }
 
 const baseApplication: Application = {
@@ -99,7 +95,7 @@ function buildService(application: Application) {
     disbursementRepository,
     fakeApplicantAccountRepository(),
     payoutAdapter,
-    fakeConnection(),
+    fakeDataSource(),
   );
 
   return { service, store, records, payoutSpy };

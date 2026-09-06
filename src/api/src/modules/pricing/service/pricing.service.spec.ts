@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { Decimal } from 'decimal.js';
 import { PricingService } from './pricing.service.js';
 import { PricingRepository } from '../repository/pricing.repository.js';
-import { Offer } from '../schema/offer.schema.js';
+import { Offer } from '../entity/offer.entity.js';
 import { IntakeService } from '../../intake/service/intake.service.js';
-import { Application } from '../../intake/schema/application.schema.js';
+import { Application } from '../../intake/entity/application.entity.js';
 import { ApplicationState } from '../../../domain/application-state.js';
 import { Money } from '../../../domain/money.js';
 

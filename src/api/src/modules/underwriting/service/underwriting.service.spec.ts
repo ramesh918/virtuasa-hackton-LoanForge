@@ -1,17 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import type { ClientSession } from 'mongoose';
+import type { DataSource, EntityManager } from 'typeorm';
 import { UnderwritingService } from './underwriting.service.js';
 import { UnderwritingRepository } from '../repository/underwriting.repository.js';
 import { DecisionRepository } from '../repository/decision.repository.js';
-import { Decision, DecisionRecord } from '../schema/decision-record.schema.js';
+import { Decision, DecisionRecord } from '../entity/decision-record.entity.js';
 import { IntakeService } from '../../intake/service/intake.service.js';
-import { Application } from '../../intake/schema/application.schema.js';
+import { Application } from '../../intake/entity/application.entity.js';
 import { ApplicationState } from '../../../domain/application-state.js';
 import { InvalidApplicationStateException, TransitionConflictException } from '../../../domain/exceptions.js';
 
 /**
- * In-memory double that mimics the real Mongo `findOneAndUpdate({ applicationId, state: fromState }, ...)`
- * compare-and-set: only one of two concurrent calls racing on the same `fromState` can win.
+ * In-memory double that mimics the real guarded-UPDATE compare-and-set (`UPDATE ... WHERE
+ * applicationId = ? AND state = ?`): only one of two concurrent calls racing on the same
+ * `fromState` can win.
  */
 function fakeUnderwritingRepository(initial: Application) {
   const store = { ...initial };
@@ -46,16 +47,10 @@ function fakeIntakeService(store: Application): IntakeService {
   return { findById: async () => ({ ...store }) } as unknown as IntakeService;
 }
 
-function fakeConnection() {
+function fakeDataSource(): DataSource {
   return {
-    startSession: async () => {
-      const session = {
-        withTransaction: async (fn: () => Promise<void>) => fn(),
-        endSession: async () => {},
-      } as unknown as ClientSession;
-      return session;
-    },
-  } as unknown as import('mongoose').Connection;
+    transaction: async <T>(fn: (manager: EntityManager) => Promise<T>) => fn({} as EntityManager),
+  } as unknown as DataSource;
 }
 
 const baseApplication: Application = {
@@ -77,7 +72,7 @@ function buildService(initial: Application) {
     fakeIntakeService(store),
     repository,
     decisionRepository,
-    fakeConnection(),
+    fakeDataSource(),
   );
   return { service, store, records };
 }

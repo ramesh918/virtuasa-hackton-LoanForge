@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { IntakeService } from '../../intake/service/intake.service.js';
 import { UnderwritingService } from '../../underwriting/service/underwriting.service.js';
 import { APPLICANT_REPOSITORY } from '../repository/applicant.repository.js';
@@ -27,7 +27,7 @@ export class EligibilityService {
   async evaluate(applicationId: string): Promise<EligibilityDecision> {
     const application = await this.intakeService.findById(applicationId);
     if (!application) {
-      throw new Error(`Application ${applicationId} not found`);
+      throw new NotFoundException(`Application ${applicationId} not found`);
     }
 
     const applicant = await this.applicantRepository.findByApplicantId(application.applicantId);

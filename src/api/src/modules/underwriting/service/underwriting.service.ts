@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import type { ClientSession, Connection } from 'mongoose';
 import { IntakeService } from '../../intake/service/intake.service.js';
@@ -35,7 +35,7 @@ export class UnderwritingService {
   ): Promise<Application> {
     const application = await this.intakeService.findById(applicationId);
     if (!application) {
-      throw new Error(`Application ${applicationId} not found`);
+      throw new NotFoundException(`Application ${applicationId} not found`);
     }
 
     assertTransitionAllowed(applicationId, application.state, toState);

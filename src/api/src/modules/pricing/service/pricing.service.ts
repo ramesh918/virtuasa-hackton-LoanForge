@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 import { IntakeService } from '../../intake/service/intake.service.js';
 import { PRICING_REPOSITORY } from '../repository/pricing.repository.js';
@@ -35,7 +35,7 @@ export class PricingService {
   async priceApplication(applicationId: string, creditScore: number): Promise<Offer> {
     const application = await this.intakeService.findById(applicationId);
     if (!application) {
-      throw new Error(`Application ${applicationId} not found`);
+      throw new NotFoundException(`Application ${applicationId} not found`);
     }
 
     const band = this.assignRateBand(creditScore);

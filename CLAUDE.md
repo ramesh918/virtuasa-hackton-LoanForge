@@ -1,8 +1,10 @@
 # LoanForge — CLAUDE.md
 
 ## Tech Stack
-NestJS (backend, TypeScript, ESM) · React + Vite (frontend) · MongoDB via Docker (`docker-compose.yml`,
-no local `mongod`) · npm workspaces · Vitest · dependency-cruiser.
+NestJS (backend, TypeScript, ESM) · React + Vite (frontend) · SQLite via TypeORM + `better-sqlite3`
+(a single file, `src/api/loanforge.sqlite` — no Docker, no database server) · npm workspaces · Vitest ·
+dependency-cruiser. See `docs/adr/0002-sqlite-over-mongodb.md` for why this replaced the original
+MongoDB choice (`docs/adr/0001-mongodb-over-sql.md`, superseded).
 
 ## Architecture Boundaries
 See `docs/architecture.md` for the diagram and full rationale; enforced by `.dependency-cruiser.cjs`
@@ -13,8 +15,11 @@ See `docs/architecture.md` for the diagram and full rationale; enforced by `.dep
 - Domain code (`src/api/src/domain/`) has zero imports from any `modules/*` — it is depended on, never
   depends on feature modules.
 - Cross-module data access goes through the owning module's Service, not its Repository — the one
-  exception is reusing another module's schema class to register a second, read-only Mongoose model
-  against the same collection (a data-shape reuse, not a repository call).
+  exception is reusing another module's entity class to register a second, read-only TypeORM
+  repository against the same table (a data-shape reuse, not a repository call).
+- Any `@Column()` whose TypeScript type is a `const`-object-derived union (e.g. `ApplicationState`,
+  `Decision`) must set an explicit `type:` — see `docs/fix-loops/mongoose-schema-enum-type-collision.md`
+  for the exact failure this avoids (the bug recurs identically under TypeORM, not just Mongoose).
 
 ## Rules
 
@@ -23,7 +28,7 @@ See `docs/architecture.md` for the diagram and full rationale; enforced by `.dep
   [testable: grep for `parseFloat`/native arithmetic on money fields in review]
 
 ### Structure
-- Every feature module has `controller/`, `service/`, `repository/`, `schema/` sub-folders — no flat
+- Every feature module has `controller/`, `service/`, `repository/`, `entity/` sub-folders — no flat
   modules. [testable: `.dependency-cruiser.cjs` boundary rules, `npm run test:arch --workspace=src/api`]
 
 ### Safety

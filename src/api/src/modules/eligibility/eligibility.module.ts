@@ -1,26 +1,21 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { IntakeModule } from '../intake/intake.module.js';
 import { UnderwritingModule } from '../underwriting/underwriting.module.js';
 import { PricingModule } from '../pricing/pricing.module.js';
-import { Applicant, ApplicantSchema } from './schema/applicant.schema.js';
-import { APPLICANT_REPOSITORY, MongoApplicantRepository } from './repository/applicant.repository.js';
+import { Applicant } from './entity/applicant.entity.js';
+import { APPLICANT_REPOSITORY, SqliteApplicantRepository } from './repository/applicant.repository.js';
 import { BureauStubService } from './service/bureau-stub.service.js';
 import { EligibilityService } from './service/eligibility.service.js';
 import { EligibilityController } from './controller/eligibility.controller.js';
 
 @Module({
-  imports: [
-    IntakeModule,
-    UnderwritingModule,
-    PricingModule,
-    MongooseModule.forFeature([{ name: Applicant.name, schema: ApplicantSchema }]),
-  ],
+  imports: [IntakeModule, UnderwritingModule, PricingModule, TypeOrmModule.forFeature([Applicant])],
   controllers: [EligibilityController],
   providers: [
     BureauStubService,
     EligibilityService,
-    { provide: APPLICANT_REPOSITORY, useClass: MongoApplicantRepository },
+    { provide: APPLICANT_REPOSITORY, useClass: SqliteApplicantRepository },
   ],
   exports: [EligibilityService],
 })

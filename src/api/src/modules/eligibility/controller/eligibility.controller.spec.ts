@@ -5,7 +5,7 @@ import { EligibilityService, EligibilityDecision } from '../service/eligibility.
 import { PricingService } from '../../pricing/service/pricing.service.js';
 import { UnderwritingService } from '../../underwriting/service/underwriting.service.js';
 import { IntakeService } from '../../intake/service/intake.service.js';
-import { Application } from '../../intake/schema/application.schema.js';
+import { Application } from '../../intake/entity/application.entity.js';
 import { ApplicationState } from '../../../domain/application-state.js';
 import { EligibilityRejectionReason } from '../config/eligibility.config.js';
 

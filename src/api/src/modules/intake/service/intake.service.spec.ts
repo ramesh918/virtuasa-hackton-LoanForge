@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { IntakeService } from './intake.service.js';
 import { IntakeRepository } from '../repository/intake.repository.js';
-import { Application } from '../schema/application.schema.js';
+import { Application } from '../entity/application.entity.js';
 import { ApplicationState } from '../../../domain/application-state.js';
 import { DuplicateApplicationException, InvalidTenureException } from '../../../domain/exceptions.js';
 import { CreateApplicationDto } from '../dto/create-application.dto.js';

@@ -3,8 +3,8 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PricingController } from './pricing.controller.js';
 import { PricingService } from '../service/pricing.service.js';
 import { IntakeService } from '../../intake/service/intake.service.js';
-import { Application } from '../../intake/schema/application.schema.js';
-import { Offer } from '../schema/offer.schema.js';
+import { Application } from '../../intake/entity/application.entity.js';
+import { Offer } from '../entity/offer.entity.js';
 import { ApplicationState } from '../../../domain/application-state.js';
 
 const ownedApplication: Application = {

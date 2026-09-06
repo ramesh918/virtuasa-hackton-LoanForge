@@ -1,32 +1,27 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
-
-export type ApplicantDocument = HydratedDocument<Applicant>;
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 /**
  * The applicant's standing profile (seeded synthetic data) — distinct from the per-application
  * snapshot captured at intake. Holds attributes like age that aren't submitted with every application.
  */
-@Schema({ collection: 'applicants' })
+@Entity({ name: 'applicants' })
 export class Applicant {
-  @Prop({ required: true, unique: true })
+  @PrimaryColumn()
   applicantId!: string;
 
-  @Prop({ required: true })
+  @Column()
   name!: string;
 
-  @Prop({ required: true })
+  @Column()
   income!: string;
 
-  @Prop({ required: true })
+  @Column()
   age!: number;
 
-  @Prop({ required: true })
+  @Column()
   employmentType!: string;
 
   /** Synthetic payout destination — masked before it is ever logged or persisted elsewhere (NFR-03). */
-  @Prop({ required: true })
+  @Column()
   accountNumber!: string;
 }
-
-export const ApplicantSchema = SchemaFactory.createForClass(Applicant);

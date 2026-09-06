@@ -1,26 +1,23 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { IntakeModule } from '../intake/intake.module.js';
-import { Application, ApplicationSchema } from '../intake/schema/application.schema.js';
-import { DecisionRecord, DecisionRecordSchema } from './schema/decision-record.schema.js';
-import { UNDERWRITING_REPOSITORY, MongoUnderwritingRepository } from './repository/underwriting.repository.js';
-import { DECISION_REPOSITORY, MongoDecisionRepository } from './repository/decision.repository.js';
+import { Application } from '../intake/entity/application.entity.js';
+import { DecisionRecord } from './entity/decision-record.entity.js';
+import {
+  UNDERWRITING_REPOSITORY,
+  SqliteUnderwritingRepository,
+} from './repository/underwriting.repository.js';
+import { DECISION_REPOSITORY, SqliteDecisionRepository } from './repository/decision.repository.js';
 import { UnderwritingService } from './service/underwriting.service.js';
 import { UnderwritingController } from './controller/underwriting.controller.js';
 
 @Module({
-  imports: [
-    IntakeModule,
-    MongooseModule.forFeature([
-      { name: Application.name, schema: ApplicationSchema },
-      { name: DecisionRecord.name, schema: DecisionRecordSchema },
-    ]),
-  ],
+  imports: [IntakeModule, TypeOrmModule.forFeature([Application, DecisionRecord])],
   controllers: [UnderwritingController],
   providers: [
     UnderwritingService,
-    { provide: UNDERWRITING_REPOSITORY, useClass: MongoUnderwritingRepository },
-    { provide: DECISION_REPOSITORY, useClass: MongoDecisionRepository },
+    { provide: UNDERWRITING_REPOSITORY, useClass: SqliteUnderwritingRepository },
+    { provide: DECISION_REPOSITORY, useClass: SqliteDecisionRepository },
   ],
   exports: [UnderwritingService],
 })

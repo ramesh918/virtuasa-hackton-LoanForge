@@ -1,29 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import type { ClientSession } from 'mongoose';
-import { DecisionRecord, DecisionRecordDocument } from '../schema/decision-record.schema.js';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import type { EntityManager } from 'typeorm';
+import { DecisionRecord } from '../entity/decision-record.entity.js';
 
 /** AC-07, NFR-02: insert-only — deliberately exposes no update or delete method. */
 export interface DecisionRepository {
-  record(decision: DecisionRecord, session?: ClientSession): Promise<DecisionRecord>;
+  record(decision: DecisionRecord, manager?: EntityManager): Promise<DecisionRecord>;
   findByApplicationId(applicationId: string): Promise<DecisionRecord[]>;
 }
 
 export const DECISION_REPOSITORY = Symbol('DECISION_REPOSITORY');
 
 @Injectable()
-export class MongoDecisionRepository implements DecisionRepository {
+export class SqliteDecisionRepository implements DecisionRepository {
   constructor(
-    @InjectModel(DecisionRecord.name) private readonly model: Model<DecisionRecordDocument>,
+    @InjectRepository(DecisionRecord) private readonly repository: Repository<DecisionRecord>,
   ) {}
 
-  async record(decision: DecisionRecord, session?: ClientSession): Promise<DecisionRecord> {
-    const [created] = await this.model.create([decision], { session });
-    return created.toObject();
+  async record(decision: DecisionRecord, manager?: EntityManager): Promise<DecisionRecord> {
+    const repo = manager ? manager.getRepository(DecisionRecord) : this.repository;
+    return repo.save(decision);
   }
 
   async findByApplicationId(applicationId: string): Promise<DecisionRecord[]> {
-    return this.model.find({ applicationId }).sort({ timestamp: 1 }).lean().exec();
+    return this.repository.find({ where: { applicationId }, order: { timestamp: 'ASC' } });
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Application, ApplicationDocument } from '../schema/application.schema.js';
+import { InjectRepository } from '@nestjs/typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
+import { Application } from '../entity/application.entity.js';
 import { isActiveState } from '../../../domain/application-state.js';
 
 export interface IntakeRepository {
@@ -17,12 +17,11 @@ export interface IntakeRepository {
 export const INTAKE_REPOSITORY = Symbol('INTAKE_REPOSITORY');
 
 @Injectable()
-export class MongoIntakeRepository implements IntakeRepository {
-  constructor(@InjectModel(Application.name) private readonly model: Model<ApplicationDocument>) {}
+export class SqliteIntakeRepository implements IntakeRepository {
+  constructor(@InjectRepository(Application) private readonly repository: Repository<Application>) {}
 
   async create(application: Application): Promise<Application> {
-    const created = await this.model.create(application);
-    return created.toObject();
+    return this.repository.save(application);
   }
 
   async findActiveByApplicantAndProduct(
@@ -30,14 +29,13 @@ export class MongoIntakeRepository implements IntakeRepository {
     productId: string,
     sinceDate: Date,
   ): Promise<Application | null> {
-    const candidates = await this.model
-      .find({ applicantId, productId, createdAt: { $gte: sinceDate } })
-      .lean()
-      .exec();
+    const candidates = await this.repository.find({
+      where: { applicantId, productId, createdAt: MoreThanOrEqual(sinceDate) },
+    });
     return candidates.find((candidate) => isActiveState(candidate.state)) ?? null;
   }
 
   async findByApplicationId(applicationId: string): Promise<Application | null> {
-    return this.model.findOne({ applicationId }).lean().exec();
+    return this.repository.findOne({ where: { applicationId } });
   }
 }

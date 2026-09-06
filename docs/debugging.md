@@ -2,6 +2,12 @@
 
 ## Issue: MongoDB transactions require a replica set
 
+**Historical — no longer applicable.** The project migrated from MongoDB to SQLite
+(`docs/adr/0002-sqlite-over-mongodb.md`), which has no replica-set requirement for transactions at all.
+Kept as a real, accurate trace of an issue actually hit and resolved at the time; see
+`docs/fix-loops/sqlite-path-resolution-cwd-mismatch.md` for the equivalent real incident from the
+SQLite migration itself.
+
 ## Symptom
 Building the underwriting feature (step 8) required wrapping a state transition and a `DecisionRecord`
 insert in one atomic transaction (NFR-06). The Docker Mongo setup from step 1 (`docker-compose.yml`) ran

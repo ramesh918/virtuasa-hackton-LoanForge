@@ -4,7 +4,7 @@ import { IntakeService } from '../../intake/service/intake.service.js';
 import { PRICING_REPOSITORY } from '../repository/pricing.repository.js';
 import type { PricingRepository } from '../repository/pricing.repository.js';
 import { RATE_BANDS, RateBand } from '../config/rate-bands.config.js';
-import { Offer } from '../schema/offer.schema.js';
+import { Offer } from '../entity/offer.entity.js';
 import { Money } from '../../../domain/money.js';
 
 @Injectable()

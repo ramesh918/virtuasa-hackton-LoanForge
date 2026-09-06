@@ -151,5 +151,11 @@ vite.config.ts.timestamp-*
 /web/blob-report/
 /web/playwright/.cache/
 
+# SQLite runtime data — recreated by `npm run seed` / `npm run api`, never committed
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
 # macOS
 .DS_Store

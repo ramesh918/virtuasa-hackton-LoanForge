@@ -28,7 +28,7 @@ unit-tests:
   image: node:22
   script:
     # The backend Vitest suite uses in-memory fake repositories throughout (see any *.spec.ts under
-    # src/api/src/modules/*/service) — no live MongoDB is required to run it.
+    # src/api/src/modules/*/service) — no live database is required to run it.
     - npm run test:cov --workspace=src/api
 
 architecture-test:

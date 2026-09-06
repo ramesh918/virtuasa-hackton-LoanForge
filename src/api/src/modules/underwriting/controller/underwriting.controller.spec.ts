@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ForbiddenException } from '@nestjs/common';
 import { UnderwritingController } from './underwriting.controller.js';
 import { UnderwritingService } from '../service/underwriting.service.js';
-import { Decision } from '../schema/decision-record.schema.js';
+import { Decision } from '../entity/decision-record.entity.js';
 
 function fakeUnderwritingService(): UnderwritingService {
   return {

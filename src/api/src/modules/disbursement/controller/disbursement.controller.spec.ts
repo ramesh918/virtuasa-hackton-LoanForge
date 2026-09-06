@@ -3,7 +3,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { DisbursementController } from './disbursement.controller.js';
 import { DisbursementService } from '../service/disbursement.service.js';
 import { IntakeService } from '../../intake/service/intake.service.js';
-import { Application } from '../../intake/schema/application.schema.js';
+import { Application } from '../../intake/entity/application.entity.js';
 import { ApplicationState } from '../../../domain/application-state.js';
 
 const ownedApplication: Application = {

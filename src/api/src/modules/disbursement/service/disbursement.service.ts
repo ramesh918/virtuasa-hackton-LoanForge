@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/mongoose';
-import type { Connection } from 'mongoose';
+import { InjectDataSource } from '@nestjs/typeorm';
+import type { DataSource } from 'typeorm';
 import { IntakeService } from '../../intake/service/intake.service.js';
 import { PricingService } from '../../pricing/service/pricing.service.js';
 import { UnderwritingService } from '../../underwriting/service/underwriting.service.js';
@@ -9,7 +9,7 @@ import type { DisbursementRepository } from '../repository/disbursement.reposito
 import { APPLICANT_ACCOUNT_REPOSITORY } from '../repository/applicant-account.repository.js';
 import type { ApplicantAccountRepository } from '../repository/applicant-account.repository.js';
 import { StubPayoutAdapter } from './stub-payout.adapter.js';
-import { DisbursementRecord } from '../schema/disbursement-record.schema.js';
+import { DisbursementRecord } from '../entity/disbursement-record.entity.js';
 import { ApplicationState } from '../../../domain/application-state.js';
 import { Money } from '../../../domain/money.js';
 
@@ -24,7 +24,7 @@ export class DisbursementService {
     @Inject(DISBURSEMENT_REPOSITORY) private readonly repository: DisbursementRepository,
     @Inject(APPLICANT_ACCOUNT_REPOSITORY) private readonly accountRepository: ApplicantAccountRepository,
     private readonly payoutAdapter: StubPayoutAdapter,
-    @InjectConnection() private readonly connection: Connection,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -53,25 +53,20 @@ export class DisbursementService {
       accountNumber,
     );
 
-    const session = await this.connection.startSession();
-    try {
-      let record!: DisbursementRecord;
-      await session.withTransaction(async () => {
-        await this.underwritingService.transition(applicationId, ApplicationState.DISBURSED, session);
-        record = {
-          applicationId,
-          amount: application.amount,
-          tenureMonths: offer.tenureMonths,
-          maskedAccountReference,
-          payoutReference,
-          disbursedAt: new Date(),
-        };
-        await this.repository.save(record, session);
-      });
-      this.logger.log(`Disbursed application ${applicationId} to ${maskedAccountReference}`);
-      return record;
-    } finally {
-      await session.endSession();
-    }
+    const record = await this.dataSource.transaction(async (manager) => {
+      await this.underwritingService.transition(applicationId, ApplicationState.DISBURSED, manager);
+      const newRecord: DisbursementRecord = {
+        applicationId,
+        amount: application.amount,
+        tenureMonths: offer.tenureMonths,
+        maskedAccountReference,
+        payoutReference,
+        disbursedAt: new Date(),
+      };
+      return this.repository.save(newRecord, manager);
+    });
+
+    this.logger.log(`Disbursed application ${applicationId} to ${maskedAccountReference}`);
+    return record;
   }
 }

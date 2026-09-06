@@ -7,7 +7,7 @@ Underwriting & Approval Workflow (AC-06, AC-07, NFR-06)
 2026-09-06
 
 ## Status
-Done
+Done — archived 2026-09-06 by the janitor agent (feature merged into feature-1)
 
 ## Goal
 Enforce the full application lifecycle as an explicit state machine, expose an underwriter review queue

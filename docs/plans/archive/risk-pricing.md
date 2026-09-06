@@ -7,7 +7,7 @@ Risk-Based Pricing (AC-04)
 2026-09-06
 
 ## Status
-Done
+Done — archived 2026-09-06 by the janitor agent (feature merged into feature-1)
 
 ## Goal
 Given an application and its eligibility-derived credit score, assign an interest-rate band and

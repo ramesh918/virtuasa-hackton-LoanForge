@@ -7,7 +7,7 @@ Application Intake (AC-01, AC-05)
 2026-09-06
 
 ## Status
-Done
+Done — archived 2026-09-06 by the janitor agent (feature merged into feature-1)
 
 ## Goal
 Let an applicant submit a loan application and create it in `SUBMITTED` state, while preventing a
